@@ -1,15 +1,36 @@
-import { Container, Typography } from "@mui/material";
-import { Link } from "react-router-dom";
+import { Container, Grid } from "@mui/material";
+import { useEffect, useState } from "react";
+import { Dish } from "../../types/BackendResponses";
+import { makeRequest } from "../../helper/axios";
+import { MenuItem } from "./MenuItem";
+import { DishTypeList } from "./DishTypeList";
 
 export function MenuRoute() {
+  const [dishes, setDishes] = useState<Dish[]>([]);
+
+  useEffect(() => {
+    makeRequest("get", "/menu").then((resp) => setDishes(resp.data));
+  }, []);
+
   return (
-    <Container>
-      <Typography variant="h2" align="center">
-        Menu page
-      </Typography>
-      <Typography variant="h4" align="center">
-        <Link to={"/"}>Home</Link>
-      </Typography>
+    <Container
+      sx={{ display: "flex", flexDirection: "column", alignContent: "center" }}
+    >
+      <DishTypeList />
+      <Grid container spacing={2}>
+        {dishes.map((dish) => (
+          <Grid
+            item
+            key={dish.id}
+            xs={12}
+            md={6}
+            display={"flex"}
+            justifyContent={"center"}
+          >
+            <MenuItem dish={dish} />
+          </Grid>
+        ))}
+      </Grid>
     </Container>
   );
 }
