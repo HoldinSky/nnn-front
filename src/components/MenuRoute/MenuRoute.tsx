@@ -3,22 +3,35 @@ import { useEffect, useState } from "react";
 import { Dish } from "../../types/BackendResponses";
 import { makeRequest } from "../../helper/axios";
 import { MenuItem } from "./MenuItem";
-import { DishTypeList } from "./DishTypeList";
+import { DishCategory, DishTypeList } from "./DishTypeList";
 
 export function MenuRoute() {
   const [dishes, setDishes] = useState<Dish[]>([]);
+  const [sortedDishes, setSortedDishes] = useState(dishes);
 
   useEffect(() => {
-    makeRequest("get", "/menu").then((resp) => setDishes(resp.data));
+    makeRequest("get", "/menu").then((resp) => {
+      setDishes(resp.data);
+      setSortedDishes(resp.data);
+    });
   }, []);
+
+  const handleSwitchCategory = (category: DishCategory) => {
+    if (category === "All") {
+      setSortedDishes(dishes);
+      return;
+    }
+
+    setSortedDishes(dishes.filter(dish => dish.type_ === category));
+  };
 
   return (
     <Container
       sx={{ display: "flex", flexDirection: "column", alignContent: "center" }}
     >
-      <DishTypeList />
+      <DishTypeList dishes={dishes} onCategorySwitch={handleSwitchCategory} />
       <Grid container spacing={2}>
-        {dishes.map((dish) => (
+        {sortedDishes.map((dish) => (
           <Grid
             item
             key={dish.id}
