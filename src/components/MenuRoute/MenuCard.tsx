@@ -72,7 +72,11 @@ const DishHeader = ({ name, dishType }: { name: string; dishType: string }) => (
   </Box>
 );
 
-const OrderButton = () => (
+interface OrderButtonProps {
+  onClick: () => void;
+}
+
+const OrderButton = ({ onClick }: OrderButtonProps) => (
   <Button
     sx={{
       backgroundColor: "#F0F8FF",
@@ -82,6 +86,7 @@ const OrderButton = () => (
     }}
     size="small"
     color="primary"
+    onClick={onClick}
   >
     Order
   </Button>
@@ -89,9 +94,10 @@ const OrderButton = () => (
 
 interface Props {
   dish: Dish;
+  onDishOrder: (id: number) => void;
 }
 
-export function MenuItem({ dish }: Props) {
+export function MenuCard({ dish, onDishOrder }: Props) {
   const [showIngredients, setShowIngredients] = useState(false);
   const [ingredients, setIngredients] = useState<Ingredient[] | undefined>(
     undefined
@@ -106,7 +112,7 @@ export function MenuItem({ dish }: Props) {
             const ingredients: Ingredient[] = [];
 
             for (let i = 0; i < data.length; i++) {
-              ingredients.push({name: data[i][0], grams: data[i][1]});
+              ingredients.push({ name: data[i][0], grams: data[i][1] });
             }
 
             setIngredients(ingredients);
@@ -117,26 +123,26 @@ export function MenuItem({ dish }: Props) {
   };
 
   return (
-    <Card sx={{ maxWidth: "450px", minWidth: "23rem" }}>
-      <CardActionArea onClick={handleClickOnDish}>
-        <CardMedia
-          component="img"
-          height="170"
-          image="/src/assets/dish-placeholder-2.jpeg"
-          alt={dish.name}
-        />
-        <DishHeader name={dish.name} dishType={dish.type_} />
-        <CardContent sx={{ paddingTop: 0, paddingBottom: 0 }}>
-          {showIngredients && ingredients ? (
-            <DishIngredients ingredients={ingredients} />
-          ) : (
-            <DishOverview dish={dish} />
-          )}
-        </CardContent>
-      </CardActionArea>
-      <CardActions>
-        <OrderButton />
-      </CardActions>
-    </Card>
+      <Card sx={{ maxWidth: "450px", minWidth: "23rem" }}>
+        <CardActionArea onClick={handleClickOnDish}>
+          <CardMedia
+            component="img"
+            height="170"
+            image="/src/assets/dish-placeholder-2.jpeg"
+            alt={dish.name}
+          />
+          <DishHeader name={dish.name} dishType={dish.type_} />
+          <CardContent sx={{ paddingTop: 0, paddingBottom: 0 }}>
+            {showIngredients && ingredients ? (
+              <DishIngredients ingredients={ingredients} />
+            ) : (
+              <DishOverview dish={dish} />
+            )}
+          </CardContent>
+        </CardActionArea>
+        <CardActions>
+          <OrderButton onClick={() => onDishOrder(dish.id)} />
+        </CardActions>
+      </Card>
   );
 }

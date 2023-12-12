@@ -3,6 +3,7 @@ import { HomeRoute } from "./components/HomeRoute/HomeRoute";
 import { MenuRoute } from "./components/MenuRoute/MenuRoute";
 import { Navbar } from "./components/Navbar/Navbar";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
+import { OrderRoute } from "./components/OrderRoute/OrderRoute";
 
 const theme = createTheme({
   palette: {
@@ -25,6 +26,7 @@ export function App() {
       <Routes>
         <Route path="/" element={<HomeRoute />} />
         <Route path="/menu" element={<MenuRoute />} />
+        <Route path="/order" element={<OrderRoute />} />
       </Routes>
       <Navbar />
     </ThemeProvider>

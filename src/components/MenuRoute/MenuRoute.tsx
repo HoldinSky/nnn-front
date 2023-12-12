@@ -1,9 +1,9 @@
-import { Container, Grid } from "@mui/material";
+import { Container } from "@mui/material";
 import { useEffect, useState } from "react";
 import { Dish } from "../../types/BackendResponses";
 import { backendCall } from "../../helper/axios";
-import { MenuItem } from "./MenuItem";
-import { DishCategory, DishTypeList } from "./DishTypeList";
+import { DishCategory } from "./DishTypeList";
+import { MenuPage } from "./MenuPage";
 
 export function MenuRoute() {
   const [dishes, setDishes] = useState<Dish[]>([]);
@@ -29,21 +29,11 @@ export function MenuRoute() {
     <Container
       sx={{ display: "flex", flexDirection: "column", alignContent: "center" }}
     >
-      <DishTypeList dishes={dishes} onCategorySwitch={handleSwitchCategory} />
-      <Grid container spacing={1}>
-        {filteredDishes.map((dish) => (
-          <Grid
-            item
-            key={dish.id}
-            xs={12}
-            md={filteredDishes.length > 1 ? 6 : 12}
-            display={"flex"}
-            justifyContent={"center"}
-          >
-            <MenuItem dish={dish} />
-          </Grid>
-        ))}
-      </Grid>
+      <MenuPage
+        dishes={dishes}
+        filteredDishes={filteredDishes}
+        handleSwitchCategory={handleSwitchCategory}
+      />
     </Container>
   );
 }

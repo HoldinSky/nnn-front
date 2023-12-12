@@ -18,9 +18,9 @@ export interface Dish {
   approx_cook_time_s: number
 }
 
-export interface RedisDish {
+export interface DishWithCount {
   dish: Dish,
-  ingredients: Ingredient[]
+  count: number
 }
 
 export interface Ingredient {
