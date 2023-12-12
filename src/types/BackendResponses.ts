@@ -17,3 +17,13 @@ export interface Dish {
   price: number,
   approx_cook_time_s: number
 }
+
+export interface RedisDish {
+  dish: Dish,
+  ingredients: Ingredient[]
+}
+
+export interface Ingredient {
+  name: String,
+  grams: number
+}

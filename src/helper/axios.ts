@@ -4,7 +4,7 @@ const HOST = "http://localhost:8080";
 
 type reqMethod = "get" | "post" | "put" | "delete";
 
-export function makeRequest(method: reqMethod, url: string, config?: AxiosRequestConfig<any>): Promise<AxiosResponse<any, any>> {
+export function backendCall(method: reqMethod, url: string, config?: AxiosRequestConfig<any>): Promise<AxiosResponse<any, any>> {
   return axios({
     url: `${HOST}${url}`,
     method,
