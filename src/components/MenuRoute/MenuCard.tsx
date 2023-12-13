@@ -12,12 +12,13 @@ import {
   ListItemText,
   Typography,
 } from "@mui/material";
-import { Dish, Ingredient } from "../../types/BackendResponses";
+import { Dish, Ingredient } from "../../types/BackendResponseTypes";
 import ScaleIcon from "@mui/icons-material/Scale";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import AlarmOnIcon from "@mui/icons-material/AlarmOn";
 import { backendCall } from "../../helper/axios";
 import { useState } from "react";
+import { CL_PRIMARY, CL_PRIMARY_DARK } from "../../helper/constants";
 
 function DishOverview({ dish }: { dish: Dish }) {
   return (
@@ -74,30 +75,32 @@ const DishHeader = ({ name, dishType }: { name: string; dishType: string }) => (
 
 interface OrderButtonProps {
   onClick: () => void;
+  orderExists: boolean;
 }
 
-const OrderButton = ({ onClick }: OrderButtonProps) => (
+const OrderButton = ({ onClick, orderExists }: OrderButtonProps) => (
   <Button
     sx={{
-      backgroundColor: "#F0F8FF",
+      backgroundColor: CL_PRIMARY,
       fontWeight: "bold",
-      boxShadow: "#3570a5 0px 1px",
+      boxShadow: `${CL_PRIMARY_DARK} 0px 1px`,
       color: "black",
     }}
     size="small"
     color="primary"
     onClick={onClick}
   >
-    Order
+    {orderExists ? "Order" : "Create order"}
   </Button>
 );
 
 interface Props {
   dish: Dish;
   onDishOrder: (id: number) => void;
+  orderExists: boolean;
 }
 
-export function MenuCard({ dish, onDishOrder }: Props) {
+export function MenuCard({ dish, onDishOrder, orderExists }: Props) {
   const [showIngredients, setShowIngredients] = useState(false);
   const [ingredients, setIngredients] = useState<Ingredient[] | undefined>(
     undefined
@@ -123,26 +126,29 @@ export function MenuCard({ dish, onDishOrder }: Props) {
   };
 
   return (
-      <Card sx={{ maxWidth: "450px", minWidth: "23rem" }}>
-        <CardActionArea onClick={handleClickOnDish}>
-          <CardMedia
-            component="img"
-            height="170"
-            image="/src/assets/dish-placeholder-2.jpeg"
-            alt={dish.name}
-          />
-          <DishHeader name={dish.name} dishType={dish.type_} />
-          <CardContent sx={{ paddingTop: 0, paddingBottom: 0 }}>
-            {showIngredients && ingredients ? (
-              <DishIngredients ingredients={ingredients} />
-            ) : (
-              <DishOverview dish={dish} />
-            )}
-          </CardContent>
-        </CardActionArea>
-        <CardActions>
-          <OrderButton onClick={() => onDishOrder(dish.id)} />
-        </CardActions>
-      </Card>
+    <Card sx={{ maxWidth: "450px", minWidth: "23rem" }}>
+      <CardActionArea onClick={handleClickOnDish}>
+        <CardMedia
+          component="img"
+          height="170"
+          image="/src/assets/dish-placeholder-2.jpeg"
+          alt={dish.name}
+        />
+        <DishHeader name={dish.name} dishType={dish.type_} />
+        <CardContent sx={{ paddingTop: 0, paddingBottom: 0 }}>
+          {showIngredients && ingredients ? (
+            <DishIngredients ingredients={ingredients} />
+          ) : (
+            <DishOverview dish={dish} />
+          )}
+        </CardContent>
+      </CardActionArea>
+      <CardActions>
+        <OrderButton
+          onClick={() => onDishOrder(dish.id)}
+          orderExists={orderExists}
+        />
+      </CardActions>
+    </Card>
   );
 }

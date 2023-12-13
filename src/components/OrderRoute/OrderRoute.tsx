@@ -1,15 +1,20 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { backendCall } from "../../helper/axios";
-import { Dish, DishWithCount } from "../../types/BackendResponses";
+import { Dish, OrderInfo } from "../../types/BackendResponseTypes";
 import { Box, Button, Grid, Paper, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { CL_INFO, CL_SECONDARY, getOrderStatus } from "../../helper/constants";
+import { useInterval } from "react-use";
+import { CustomContext } from "../CustomContextProvider";
 
-function OrderEntry({ dish, count }: { dish: Dish, count: number }) {
+function OrderEntry({ dish, count }: { dish: Dish; count: number }) {
   return (
     <Box display="flex" mx="1rem">
       <Typography>{dish.name}</Typography>
       <Box flexGrow={1} />
-      <Typography>{dish.price} {count > 1 && `x ${count}`}</Typography>
+      <Typography>
+        {dish.price} {count > 1 && `x ${count}`}
+      </Typography>
     </Box>
   );
 }
@@ -63,13 +68,13 @@ function OrderActions({
         disabled={isConfirmed}
         onClick={confirmOrder}
         label={"Confirm"}
-        bgColor="yellow"
+        bgColor={CL_INFO}
       />
       <ActionButton
         disabled={isPaid}
         onClick={payOrder}
         label={"Pay"}
-        bgColor="green"
+        bgColor={CL_SECONDARY}
       />
     </Grid>
   );
@@ -77,68 +82,96 @@ function OrderActions({
 
 export function OrderRoute() {
   const navigate = useNavigate();
-
   const currentOrder = localStorage.getItem("currentOrder");
-  const [orderedDishes, setOrderedDishes] = useState<DishWithCount[]>([]);
-  const [totalPrice, setTotalPrice] = useState(0);
 
-  const isConfirmed =
-    localStorage.getItem(`orrder-${currentOrder}-isConfirmed`) === "true";
-  const isPaid =
-    localStorage.getItem(`order-${currentOrder}-isPaid`) === "true";
+  const { setDishesOrdered } = useContext(CustomContext);
+  const [orderInfo, setOrderInfo] = useState<OrderInfo | undefined>(undefined);
+
+  const updateOrderInfo = useMemo(
+    () => () => {
+      backendCall("get", `/order/get/${currentOrder}`)
+        .then((resp) => {
+          setOrderInfo(resp.data);
+        })
+        .catch((err) => err);
+    },
+    []
+  );
 
   useEffect(() => {
-    backendCall("get", `/order/${currentOrder}`).then((resp) => {
-      setOrderedDishes(resp.data);
-
-      let price = 0;
-      (resp.data as DishWithCount[]).forEach((el) => (price += el.dish.price * el.count));
-
-      setTotalPrice(price);
-    });
+    updateOrderInfo();
   }, []);
 
+  useInterval(() => {
+    backendCall("get", `/order/get/${currentOrder}`)
+      .then((resp) => {
+        setOrderInfo(resp.data);
+      })
+      .catch((err) => err);
+  }, 2000);
+
   const handleConfirm = () => {
-    backendCall("post", `/order/${currentOrder}/confirm`).then(() =>
-      localStorage.setItem(`order-${currentOrder}-isConfirmed`, "true")
-    );
+    backendCall("post", `/order/${currentOrder}/confirm`)
+      .then(() => {
+        localStorage.setItem(`order-${currentOrder}-isConfirmed`, "true");
+        updateOrderInfo();
+      })
+      .catch((err) => err);
   };
 
   const handlePay = () => {
-    backendCall("post", `/order/${currentOrder}/pay`).then(() =>
-      localStorage.setItem(`order-${currentOrder}-isPaid`, "true")
-    );
+    backendCall("post", `/order/${currentOrder}/pay`).then(() => {
+      localStorage.setItem(`order-${currentOrder}-isPaid`, "true");
+      updateOrderInfo();
+    });
   };
 
   const handleClear = () => {
-    navigate("/menu");
+    navigate("/");
+    setDishesOrdered(0);
     localStorage.clear();
   };
 
   return (
     <Paper>
-      <Typography variant="h3" align="center">
-        Your order
+      <Typography variant="h4" align="center" py="0.5rem">
+        Your order{" "}
+        {orderInfo?.order.table_id && ` (table ${orderInfo?.order.table_id})`}
       </Typography>
-      {orderedDishes.map((dishWithCount) => (
-        <OrderEntry dish={dishWithCount.dish} count={dishWithCount.count}/>
-      ))}
+      <Box m="0.5rem" border="solid 0.5px" borderRadius="5px">
+        {orderInfo?.dishes.map((dishWithCount) => (
+          <OrderEntry
+            key={dishWithCount.dish.id}
+            dish={dishWithCount.dish}
+            count={dishWithCount.count}
+          />
+        ))}
+      </Box>
       <Box mx="1rem" pt="1rem">
-        Total price: {totalPrice}
+        Total price: {orderInfo ? orderInfo.order.total_cost : 0}
       </Box>
       <Box mx="1rem" mt="1rem">
-        Status: {isPaid ? "Paid" : isConfirmed ? "Processing" : "Ordering"}
+        Status:{" "}
+        {orderInfo
+          ? getOrderStatus(
+              orderInfo.order.is_confirmed,
+              orderInfo.order.is_cooked,
+              orderInfo.order.is_paid
+            )
+          : ""}
       </Box>
       <OrderActions
         confirmOrder={handleConfirm}
         payOrder={handlePay}
-        isConfirmed={isConfirmed}
-        isPaid={isPaid}
+        isConfirmed={orderInfo?.order.is_confirmed ?? false}
+        isPaid={orderInfo?.order.is_paid ?? false}
       />
-      <Box display="flex" flexGrow={1}  mx="0.5rem" pb="0.5rem">
+      <Box display="flex" flexGrow={1} mx="0.5rem" pb="0.5rem">
         <Button
           onClick={handleClear}
-          disabled={isPaid && isConfirmed}
+          disabled={
+            orderInfo && orderInfo.order.is_cooked && !orderInfo.order.is_paid
+          }
           fullWidth
           sx={{
             fontWeight: "bolder",

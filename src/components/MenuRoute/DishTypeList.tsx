@@ -1,6 +1,7 @@
 import { Box, Typography, styled } from "@mui/material";
-import { Dish, DishType } from "../../types/BackendResponses";
+import { Dish, DishType } from "../../types/BackendResponseTypes";
 import { useState } from "react";
+import { CL_PRIMARY, CL_SECONDARY, CL_SECONDARY_LIGHT } from "../../helper/constants";
 
 const ScrollContainer = styled("div")({
   overflowX: "scroll",
@@ -10,9 +11,9 @@ const ScrollContainer = styled("div")({
   scrollbarWidth: "none",
 
   margin: "16px 0 16px 0",
-  backgroundColor: "#B9D9EB",
+  backgroundColor: CL_SECONDARY,
   borderRadius: 20,
-  boxShadow: "#5391c4 0px 2px 3px",
+  boxShadow: `${CL_SECONDARY } 0px 2px 3px`,
   cursor: "grab",
 });
 
@@ -22,14 +23,10 @@ const ScrollItem = styled("div")(
     padding: "0 8px 0 8px",
     margin: 10,
 
-    backgroundColor: active ? "#FFBF00" : "#F0F8FF",
+    backgroundColor: active ? CL_PRIMARY : CL_SECONDARY_LIGHT,
     borderRadius: 8,
-    boxShadow: "#3570a5 0px 1px",
+    boxShadow: `${CL_SECONDARY} 0px 1px`,
     cursor: "pointer",
-
-    "&:hover": {
-      backgroundColor: "#d0d8df",
-    },
   })
 );
 

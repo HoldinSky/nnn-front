@@ -1,6 +1,6 @@
 import { Container } from "@mui/material";
 import { useEffect, useState } from "react";
-import { Dish } from "../../types/BackendResponses";
+import { Dish } from "../../types/BackendResponseTypes";
 import { backendCall } from "../../helper/axios";
 import { DishCategory } from "./DishTypeList";
 import { MenuPage } from "./MenuPage";

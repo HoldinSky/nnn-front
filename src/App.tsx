@@ -1,34 +1,46 @@
 import { Route, Routes } from "react-router-dom";
-import { HomeRoute } from "./components/HomeRoute/HomeRoute";
 import { MenuRoute } from "./components/MenuRoute/MenuRoute";
 import { Navbar } from "./components/Navbar/Navbar";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { OrderRoute } from "./components/OrderRoute/OrderRoute";
+import { FeedbackRoute } from "./components/FeedbackRoute/FeedbackRoute";
+import {
+  CL_PRIMARY,
+  CL_PRIMARY_LIGHT,
+  CL_SECONDARY,
+  CL_INFO,
+} from "./helper/constants";
+import {
+  CustomContextProvider,
+} from "./components/CustomContextProvider";
 
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#FFBF00',
-      light: '#FFEF00'
+      main: CL_PRIMARY,
+      light: CL_PRIMARY_LIGHT,
     },
     secondary: {
-      main: '#2072AF',
+      main: CL_SECONDARY,
     },
     info: {
-      main: '#00BFFF'
-    }
+      main: CL_INFO,
+    },
   },
 });
 
 export function App() {
   return (
     <ThemeProvider theme={theme}>
-      <Routes>
-        <Route path="/" element={<HomeRoute />} />
-        <Route path="/menu" element={<MenuRoute />} />
-        <Route path="/order" element={<OrderRoute />} />
-      </Routes>
-      <Navbar />
+      <CustomContextProvider>
+        <Routes>
+          <Route path="/" element={<MenuRoute />} />
+          <Route path="/order" element={<OrderRoute />} />
+          <Route path="/feedback" element={<FeedbackRoute />} />
+        </Routes>
+        <Navbar />
+      </CustomContextProvider>
     </ThemeProvider>
   );
 }
+export { CL_SECONDARY };
