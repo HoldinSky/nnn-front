@@ -12,49 +12,62 @@ import {
 import { DishCategory, DishTypeList } from "./DishTypeList";
 import { Dish } from "../../types/BackendResponseTypes";
 import { MenuCard } from "./MenuCard";
-import { useState, ChangeEvent, useContext } from "react";
+import { useState, ChangeEvent, useEffect } from "react";
 import { backendCall } from "../../helper/axios";
 import { CL_PRIMARY } from "../../helper/constants";
-import { CustomContext } from "../CustomContextProvider";
+import { useAppContext } from "../AppContextProvider";
+import isEqual from "react-fast-compare";
 
 interface Props {
-  dishes: Dish[];
-  filteredDishes: Dish[];
+  filteredDishes?: Dish[];
   handleSwitchCategory: (dc: DishCategory) => void;
 }
 
-export function MenuPage({
-  dishes,
-  filteredDishes,
-  handleSwitchCategory,
-}: Props) {
-  const [tableId, setTableId] = useState<string>("");
-  const [orderId, setOrderId] = useState<string>(
-    localStorage.getItem("currentOrder") ?? ""
-  );
-
+export function MenuPage({ filteredDishes, handleSwitchCategory }: Props) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const { dishesOrdered, setDishesOrdered } = useContext(CustomContext);
+  const [dishes, setDishes] = useState<Dish[]>([]);
+  const tableId = 35;
+
+  const {
+    menu,
+    orderDishesCount,
+    orderInfo,
+    orderId,
+    partialSetState,
+  } = useAppContext();
+
+  useEffect(() => {
+    if (menu) setDishes(menu);
+  }, [menu]);
 
   const createOrder = () => {
     backendCall("post", `/order/create-for-table/${tableId}`)
       .then((resp) => {
-        setOrderId(resp.data);
-        localStorage.setItem("currentOrder", resp.data);
+        partialSetState({ orderId: resp.data });
       })
       .catch((err) => err);
     setIsDialogOpen(false);
   };
 
-  const orderDish = (dishId: number) => {
+  const orderDish = async (dishId: number) => {
     if (!orderId) {
       setIsDialogOpen(true);
       return;
     }
 
-    backendCall("post", `/order/${orderId}/add/${dishId}`).then(() => {
-      setDishesOrdered(dishesOrdered + 1);
-    });
+    partialSetState({ orderDishesCount: orderDishesCount + 1 });
+    const respOrderId = await backendCall(
+      "post",
+      `/order/${orderId}/add/${dishId}`
+    ).catch((_e) => {});
+
+    await backendCall("get", `/order/get/${respOrderId}`)
+      .then((resp) => {
+        if (!isEqual(resp.data, orderInfo)) {
+          partialSetState({ orderInfo: resp.data });
+        }
+      })
+      .catch((_e) => {});
   };
 
   const handleTableInputChange = (
@@ -62,29 +75,30 @@ export function MenuPage({
   ) => {
     if (!Number(e.target.value) && e.target.value.length !== 0) return;
 
-    setTableId(e.target.value);
+    partialSetState({ tableId: e.target.value });
   };
 
   return (
     <>
       <DishTypeList dishes={dishes} onCategorySwitch={handleSwitchCategory} />
       <Grid container spacing={1}>
-        {filteredDishes.map((dish) => (
-          <Grid
-            item
-            key={dish.id}
-            xs={12}
-            md={filteredDishes.length > 1 ? 6 : 12}
-            display={"flex"}
-            justifyContent={"center"}
-          >
-            <MenuCard
-              dish={dish}
-              onDishOrder={orderDish}
-              orderExists={orderId.length > 0}
-            />
-          </Grid>
-        ))}
+        {filteredDishes &&
+          filteredDishes.map((dish) => (
+            <Grid
+              item
+              key={dish.id}
+              xs={12}
+              md={filteredDishes.length > 1 ? 6 : 12}
+              display={"flex"}
+              justifyContent={"center"}
+            >
+              <MenuCard
+                dish={dish}
+                onDishOrder={orderDish}
+                orderExists={orderId !== undefined}
+              />
+            </Grid>
+          ))}
       </Grid>
       <Dialog open={isDialogOpen}>
         <DialogTitle>Specify your table number</DialogTitle>

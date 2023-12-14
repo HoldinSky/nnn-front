@@ -51,7 +51,7 @@ interface Props {
 
 export function DishTypeList({ dishes, onCategorySwitch }: Props) {
   const [activeCategory, setActiveCategory] = useState<DishCategory>("All");
-  const uniqueCategories = [...new Set(dishes.map(dish => dish.type_))]
+  const uniqueCategories = [...new Set(dishes.map(dish => dish.type_))].sort();
 
   const handleSwitchCategory = (dc: DishCategory) => {
     setActiveCategory(dc);

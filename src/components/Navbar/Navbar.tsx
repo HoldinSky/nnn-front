@@ -3,8 +3,7 @@ import TextsmsIcon from "@mui/icons-material/Textsms";
 import RestaurantMenuIcon from "@mui/icons-material/RestaurantMenu";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import { useNavigate } from "react-router-dom";
-import { useContext } from "react";
-import { CustomContext } from "../CustomContextProvider";
+import { useAppContext } from "../AppContextProvider";
 
 export function Navbar() {
   const navigate = useNavigate();
@@ -21,7 +20,7 @@ export function Navbar() {
     navigate("/feedback");
   };
 
-  const {dishesOrdered} = useContext(CustomContext);
+  const { orderDishesCount } = useAppContext();
 
   return (
     <Box sx={{ paddingTop: "64px" }}>
@@ -36,7 +35,7 @@ export function Navbar() {
           </IconButton>
           <Box flexGrow={1} />
           <IconButton color="inherit" onClick={handleGoToOrder}>
-            <Badge badgeContent={dishesOrdered} color="secondary">
+            <Badge badgeContent={orderDishesCount} color="secondary">
               <ListAltIcon fontSize="large" />
             </Badge>
           </IconButton>

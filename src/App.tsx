@@ -11,8 +11,8 @@ import {
   CL_INFO,
 } from "./helper/constants";
 import {
-  CustomContextProvider,
-} from "./components/CustomContextProvider";
+  AppContextProvider,
+} from "./components/AppContextProvider";
 
 const theme = createTheme({
   palette: {
@@ -32,14 +32,14 @@ const theme = createTheme({
 export function App() {
   return (
     <ThemeProvider theme={theme}>
-      <CustomContextProvider>
+      <AppContextProvider>
         <Routes>
           <Route path="/" element={<MenuRoute />} />
           <Route path="/order" element={<OrderRoute />} />
           <Route path="/feedback" element={<FeedbackRoute />} />
         </Routes>
         <Navbar />
-      </CustomContextProvider>
+      </AppContextProvider>
     </ThemeProvider>
   );
 }

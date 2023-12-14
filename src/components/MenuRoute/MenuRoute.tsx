@@ -1,28 +1,30 @@
 import { Container } from "@mui/material";
 import { useEffect, useState } from "react";
-import { Dish } from "../../types/BackendResponseTypes";
 import { backendCall } from "../../helper/axios";
 import { DishCategory } from "./DishTypeList";
 import { MenuPage } from "./MenuPage";
+import { useAppContext } from "../AppContextProvider";
 
 export function MenuRoute() {
-  const [dishes, setDishes] = useState<Dish[]>([]);
-  const [filteredDishes, setFilteredDishes] = useState(dishes);
+  const { menu, partialSetState } = useAppContext();
+  const [filteredDishes, setFilteredDishes] = useState(menu);
 
   useEffect(() => {
     backendCall("get", "/menu").then((resp) => {
-      setDishes(resp.data);
-      setFilteredDishes(resp.data);
+      if (menu !== resp.data) {
+        partialSetState({ menu: resp.data });
+        setFilteredDishes(resp.data);
+      }
     });
   }, []);
 
   const handleSwitchCategory = (category: DishCategory) => {
     if (category === "All") {
-      setFilteredDishes(dishes);
+      setFilteredDishes(menu ?? []);
       return;
     }
 
-    setFilteredDishes(dishes.filter((dish) => dish.type_ === category));
+    setFilteredDishes(menu!.filter((dish) => dish.type_ === category));
   };
 
   return (
@@ -30,7 +32,6 @@ export function MenuRoute() {
       sx={{ display: "flex", flexDirection: "column", alignContent: "center" }}
     >
       <MenuPage
-        dishes={dishes}
         filteredDishes={filteredDishes}
         handleSwitchCategory={handleSwitchCategory}
       />

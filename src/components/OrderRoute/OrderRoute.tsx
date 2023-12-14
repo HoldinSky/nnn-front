@@ -1,11 +1,12 @@
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { backendCall } from "../../helper/axios";
 import { Dish, OrderInfo } from "../../types/BackendResponseTypes";
 import { Box, Button, Grid, Paper, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { CL_INFO, CL_SECONDARY, getOrderStatus } from "../../helper/constants";
 import { useInterval } from "react-use";
-import { CustomContext } from "../CustomContextProvider";
+import { useAppContext } from "../AppContextProvider";
+import isEqual from "react-fast-compare";
 
 function OrderEntry({ dish, count }: { dish: Dish; count: number }) {
   return (
@@ -82,54 +83,47 @@ function OrderActions({
 
 export function OrderRoute() {
   const navigate = useNavigate();
-  const currentOrder = localStorage.getItem("currentOrder");
 
-  const { setDishesOrdered } = useContext(CustomContext);
-  const [orderInfo, setOrderInfo] = useState<OrderInfo | undefined>(undefined);
+  const { orderId, orderInfo, partialSetState } = useAppContext();
+
+  const handleNewOrderInfo = (newOrderInfo: OrderInfo) => {
+    if (!isEqual(newOrderInfo, orderInfo))
+      partialSetState({ orderInfo: newOrderInfo });
+  };
 
   const updateOrderInfo = useMemo(
     () => () => {
-      backendCall("get", `/order/get/${currentOrder}`)
+      backendCall("get", `/order/get/${orderId}`)
         .then((resp) => {
-          setOrderInfo(resp.data);
+          handleNewOrderInfo(resp.data);
         })
-        .catch((err) => err);
+        .catch((_err) => {});
     },
     []
   );
 
   useEffect(() => {
-    updateOrderInfo();
+    if (orderId) updateOrderInfo();
   }, []);
 
   useInterval(() => {
-    backendCall("get", `/order/get/${currentOrder}`)
-      .then((resp) => {
-        setOrderInfo(resp.data);
-      })
-      .catch((err) => err);
+    if (orderId) updateOrderInfo();
   }, 2000);
 
   const handleConfirm = () => {
-    backendCall("post", `/order/${currentOrder}/confirm`)
-      .then(() => {
-        localStorage.setItem(`order-${currentOrder}-isConfirmed`, "true");
-        updateOrderInfo();
-      })
-      .catch((err) => err);
+    backendCall("post", `/order/${orderId}/confirm`)
+      .then(() => updateOrderInfo)
+      .catch((_e) => {});
   };
 
   const handlePay = () => {
-    backendCall("post", `/order/${currentOrder}/pay`).then(() => {
-      localStorage.setItem(`order-${currentOrder}-isPaid`, "true");
-      updateOrderInfo();
-    });
+    backendCall("post", `/order/${orderId}/pay`).then(() => updateOrderInfo());
   };
 
   const handleClear = () => {
     navigate("/");
-    setDishesOrdered(0);
     localStorage.clear();
+    partialSetState({ orderDishesCount: 0 });
   };
 
   return (
