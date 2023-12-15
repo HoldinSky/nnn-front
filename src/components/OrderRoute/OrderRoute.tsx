@@ -88,7 +88,7 @@ export function OrderRoute() {
 
   const handleNewOrderInfo = (newOrderInfo: OrderInfo) => {
     if (!isEqual(newOrderInfo, orderInfo))
-      partialSetState({ orderInfo: newOrderInfo });
+      partialSetState({ orderInfo: newOrderInfo, orderDishesCount: newOrderInfo.dishes.length });
   };
 
   const updateOrderInfo = useMemo(

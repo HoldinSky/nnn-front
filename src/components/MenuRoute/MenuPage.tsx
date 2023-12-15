@@ -28,24 +28,23 @@ export function MenuPage({ filteredDishes, handleSwitchCategory }: Props) {
   const [dishes, setDishes] = useState<Dish[]>([]);
   const tableId = 35;
 
-  const {
-    menu,
-    orderDishesCount,
-    orderInfo,
-    orderId,
-    partialSetState,
-  } = useAppContext();
+  const { menu, orderDishesCount, orderInfo, orderId, partialSetState } =
+    useAppContext();
 
   useEffect(() => {
     if (menu) setDishes(menu);
   }, [menu]);
 
+  useEffect(() => {
+    if (!orderId)
+      backendCall("post", `/order/create-for-table/${tableId}`)
+        .then((resp) => {
+          partialSetState({ orderId: resp.data });
+        })
+        .catch((err) => err);
+  }, []);
+
   const createOrder = () => {
-    backendCall("post", `/order/create-for-table/${tableId}`)
-      .then((resp) => {
-        partialSetState({ orderId: resp.data });
-      })
-      .catch((err) => err);
     setIsDialogOpen(false);
   };
 
@@ -56,15 +55,16 @@ export function MenuPage({ filteredDishes, handleSwitchCategory }: Props) {
     }
 
     partialSetState({ orderDishesCount: orderDishesCount + 1 });
-    const respOrderId = await backendCall(
-      "post",
-      `/order/${orderId}/add/${dishId}`
-    ).catch((_e) => {});
+    await backendCall("post", `/order/${orderId}/add/${dishId}`).catch(
+      (_e) => {}
+    );
 
-    await backendCall("get", `/order/get/${respOrderId}`)
+    await backendCall("get", `/order/get/${orderId}`)
       .then((resp) => {
+        console.log("fetch order: ", resp.data);
+        console.log("existing order: ", orderInfo);
         if (!isEqual(resp.data, orderInfo)) {
-          partialSetState({ orderInfo: resp.data });
+          partialSetState({ orderInfo: { ...orderInfo, ...resp.data } });
         }
       })
       .catch((_e) => {});
