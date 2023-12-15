@@ -1,7 +1,11 @@
 import { Box, Typography, styled } from "@mui/material";
 import { Dish, DishType } from "../../types/BackendResponseTypes";
 import { useState } from "react";
-import { CL_PRIMARY, CL_SECONDARY, CL_SECONDARY_LIGHT } from "../../helper/constants";
+import {
+  CL_PRIMARY,
+  CL_SECONDARY,
+  CL_SECONDARY_LIGHT,
+} from "../../helper/constants";
 
 const ScrollContainer = styled("div")({
   overflowX: "scroll",
@@ -13,22 +17,20 @@ const ScrollContainer = styled("div")({
   margin: "16px 0 16px 0",
   backgroundColor: CL_SECONDARY,
   borderRadius: 20,
-  boxShadow: `${CL_SECONDARY } 0px 2px 3px`,
+  boxShadow: `${CL_SECONDARY} 0px 2px 3px`,
   cursor: "grab",
 });
 
-const ScrollItem = styled("div")(
-  ({ active }: { active: boolean }) => ({
-    display: "inline-block",
-    padding: "0 8px 0 8px",
-    margin: 10,
+const ScrollItem = styled("div")(({ active }: { active: boolean }) => ({
+  display: "inline-block",
+  padding: "0 8px 0 8px",
+  margin: 10,
 
-    backgroundColor: active ? CL_PRIMARY : CL_SECONDARY_LIGHT,
-    borderRadius: 8,
-    boxShadow: `${CL_SECONDARY} 0px 1px`,
-    cursor: "pointer",
-  })
-);
+  backgroundColor: active ? CL_PRIMARY : CL_SECONDARY_LIGHT,
+  borderRadius: 8,
+  boxShadow: `${CL_SECONDARY} 0px 1px`,
+  cursor: "pointer",
+}));
 
 export type DishCategory = DishType | "All";
 
@@ -51,12 +53,14 @@ interface Props {
 
 export function DishTypeList({ dishes, onCategorySwitch }: Props) {
   const [activeCategory, setActiveCategory] = useState<DishCategory>("All");
-  const uniqueCategories = [...new Set(dishes.map(dish => dish.type_))].sort();
+  const uniqueCategories = [
+    ...new Set(dishes.map((dish) => dish.type_)),
+  ].sort();
 
   const handleSwitchCategory = (dc: DishCategory) => {
     setActiveCategory(dc);
     onCategorySwitch(dc);
-  }
+  };
 
   return (
     <ScrollContainer>

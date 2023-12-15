@@ -37,9 +37,10 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
     0
   );
   const [menu, setMenu] = useLocalStorage<Dish[]>("menu", []);
-  const [orderInfo, setOrderInfo] = useLocalStorage<
-    OrderInfo | undefined
-  >("currentOrder", undefined);
+  const [orderInfo, setOrderInfo] = useLocalStorage<OrderInfo | undefined>(
+    "currentOrder",
+    undefined
+  );
   const [orderId, setOrderId] = useLocalStorage<string | undefined>(
     "orderId",
     undefined
@@ -64,13 +65,13 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
 
   const updateContextState = (update: Partial<IAppContext>) => {
     partialSetState(update);
-    
+
     if (update.menu) setMenu(update.menu);
     if (update.orderId) setOrderId(update.orderId);
     if (update.tableId) setTableId(update.tableId);
     if (update.orderInfo) setOrderInfo(update.orderInfo);
     if (update.orderDishesCount) setOrderDishesCount(update.orderDishesCount);
-  }
+  };
 
   useEffect(() => {
     // if (menu !== state.menu) setMenu(state.menu);

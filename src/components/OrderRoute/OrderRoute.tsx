@@ -88,7 +88,10 @@ export function OrderRoute() {
 
   const handleNewOrderInfo = (newOrderInfo: OrderInfo) => {
     if (!isEqual(newOrderInfo, orderInfo))
-      partialSetState({ orderInfo: newOrderInfo, orderDishesCount: newOrderInfo.dishes.length });
+      partialSetState({
+        orderInfo: newOrderInfo,
+        orderDishesCount: newOrderInfo.dishes.length,
+      });
   };
 
   const updateOrderInfo = useMemo(
@@ -123,7 +126,11 @@ export function OrderRoute() {
   const handleClear = () => {
     navigate("/");
     localStorage.clear();
-    partialSetState({ orderDishesCount: 0 });
+    partialSetState({
+      orderDishesCount: 0,
+      orderInfo: undefined,
+      orderId: undefined,
+    });
   };
 
   return (
